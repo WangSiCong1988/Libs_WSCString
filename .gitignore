@@ -1,3 +1,14 @@
+# VC++6.0 Ignore Rules
+# No Production Files
+Release/**
+# No Debug Files
+Debug/**
+# No Intermediate Files
+*.ncb
+*.opt
+*.dsw
+
+
 # Prerequisites
 *.d
 
