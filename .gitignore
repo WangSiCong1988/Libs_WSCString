@@ -1,4 +1,7 @@
 # VC++6.0 Ignore Rules
+# Track Workspace Configuration 
+!*.dsw
+!*.dsp
 # No Production Files
 Release/**
 # No Debug Files
@@ -6,7 +9,6 @@ Debug/**
 # No Intermediate Files
 *.ncb
 *.opt
-*.dsw
 
 
 # Prerequisites
