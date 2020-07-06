@@ -1,2 +1,2 @@
 # Libs_WSCString
-My personal string
+My personal string header file working in C/C++ (supporting Chinese, English)
