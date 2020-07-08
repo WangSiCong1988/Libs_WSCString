@@ -17,57 +17,75 @@
 // Chinese Character in ASCII is actually coded in GB2312
 class Win32String{
 private:
+	static int defaultType;
 	int type;
 
 	// Pointers to storage different coding
 	// They are only released in the deconstruction method
 	wchar_t * lpWChar;			// WideChar Type (It is for any character in any language but only used in the memory)
-	char * lpAsciiStr;			// Ascii Code
-	char * lpUTF8Str;			// UTF-8 code
+	char * lpBytes;				// Bytes of the string (based on what code you choose)
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// Construction
 	Win32String(){
-		this->lpAsciiStr = NULL;
 		this->lpWChar = NULL;
-		this->lpUTF8Str = NULL;
-		this->type = Win32String_TYPE_ANSCII;	// The default type is ASCII
+		this->lpBytes = NULL;
+		this->type = Win32String::defaultType;	// The default type
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// Init
 	//
-	// Init: Empty String
+	// Init: An empty ASCII string
 	bool Init(){
-		this->lpAsciiStr = new (std::nothrow) char[1];
+		this->lpBytes = new (std::nothrow) char[1];
 		// Fail for OOM
-		if(this->lpAsciiStr == NULL){
+		if(!this->lpBytes){
 			return false;
 		}
 		// No OOM
-		this->lpAsciiStr[0] = '\0';
-		this->type = Win32String_TYPE_ANSCII;	// The default type is ASCII
+		this->lpBytes[0] = '\0';
+		this->type = Win32String_TYPE_ANSCII;	// The empty string is ALWAYS ASCII
 		return true;
 	}
-	// Init: An Initial Default string (depending which code you select)
+	// Init: An Default string
 	bool Init(const char * str){
 		// Empty Input, so an empty string
-		if(str == NULL){
+		if(!str){
 			return Init();
 		}
+		// Space Calculation
+		size_t bytesNum = 0;
+		switch(this->type){
+		case Win32String_TYPE_ANSCII:
+		case Win32String_TYPE_UTF8:
+			bytesNum = strlen(str)*sizeof(char) + 1;
+			break;
+		case Win32String_TYPE_UTF16_LittleEndian:
+			bytesNum = this->BYTES_UTF16BytesNum(str);
+			break;
+		}
+
 		// Has Input
-		this->lpAsciiStr = new (std::nothrow) char[strlen(str) + 1];	// 1 more space for '\0'
+		this->lpBytes = new (std::nothrow) char[bytesNum];
 		// Fail for OOM
-		if(this->lpAsciiStr == NULL){
+		if(!this->lpBytes){
 			return false;
 		}
 		// No OOM
-		strcpy(this->lpAsciiStr, str);
-		this->type = Win32String_TYPE_ANSCII;
+		this->BYTES_BytesCpy(this->lpBytes, str, bytesNum);
 		return true;
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	//-------------------------------------------------------------------------------
+	// Assitance Functions
+	//-------------------------------------------------------------------------------
+	size_t BYTES_UTF16BytesNum(const char * bytes);
+	void BYTES_BytesCpy(char * dest, char * source, size_t len);
+	void BYTES_BytesCpy(char * dest, const char * source, size_t len);
+
 public:
 	/*** Coding Types ***/
 	const static int TYPE_ANSCII;
@@ -76,30 +94,38 @@ public:
 	const static int TYPE_UTF16_LittleEndian;
 	const static int TYPE_UNICODE_PAGE1200;
 	
+	//-----------------------------------------------------------------------------
+	// SetDefaultType
+	//-----------------------------------------------------------------------------
+	static void SetDefaultType(const int type){
+		if(	type == Win32String_TYPE_ANSCII || 
+			type == Win32String_TYPE_WIDE_CHARACTER || 
+			type == Win32String_TYPE_UTF8 ||
+			type == Win32String_TYPE_UTF16_LittleEndian){
+			Win32String::defaultType = type;
+		}
+	}
 
-	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------
 	// Deconstruct
 	~Win32String(){
-		if(this->lpAsciiStr != NULL){
-			delete[] this->lpAsciiStr;
-		}
 		if(this->lpWChar != NULL){
 			delete[] this->lpWChar;
 		}
-		if(this->lpUTF8Str != NULL){
-			delete[] this->lpUTF8Str;
+		if(this->lpBytes != NULL){
+			delete[] this->lpBytes;
 		}
 	}
-	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
-	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	// Create
 	//
-	// Create: An empty string
+	// Create: An empty ASCII string
 	static Win32String * Create(){
 		Win32String * lpWin32Str = new (std::nothrow) Win32String();
 		// OOM
-		if(lpWin32Str == NULL){
+		if(!lpWin32Str){
 			return NULL;
 		}
 		// Init fails
@@ -110,11 +136,11 @@ public:
 		// All good
 		return lpWin32Str; 
 	}
-	// Create: An Initial ASCII String
+	// Create: An Default String
 	static Win32String * Create(const char * str){
 		Win32String * lpWin32Str = new (std::nothrow) Win32String();
 		// OOM
-		if(lpWin32Str == NULL){
+		if(!lpWin32Str){
 			return NULL;
 		}
 		// Init fails
@@ -153,36 +179,60 @@ public:
 			return true;
 		}
 		// Transfer - variales defination
+		wchar_t * lpWCTemp = NULL;
+		char * lpBytesTemp = NULL;
+		int iWCStrSpaceLen = 0;			// This length must include '\0\0'
 		int iUTF8StrSpaceLen = 0;		// This length must incldue '\0'
 		bool bTransRes = false;			// Default is false
-		// Space clean
-		if(this->lpUTF8Str != NULL){
-			delete[] this->lpUTF8Str;
-			this->lpUTF8Str = NULL;
-		}
+
+
 		// Transfer - based on the type
 		switch(this->type){
 		case Win32String_TYPE_ANSCII:
-			iUTF8StrSpaceLen = strlen(this->lpAsciiStr) + 1;
-			this->lpUTF8Str = new (std::nothrow) char[iUTF8StrSpaceLen];
-			if(!this->lpUTF8Str){
+			// To Wide Char
+			iWCStrSpaceLen = MultiByteToWideChar(CP_ACP, 0, this->lpBytes, -1, NULL, 0);
+			if(!iWCStrSpaceLen){
+				break;				// WideChar Space Calculation Fails
+			}
+			lpWCTemp = new (std::nothrow) wchar_t[iWCStrSpaceLen];
+			if(!lpWCTemp){
 				break;				// OOM
 			}
-			strcpy(this->lpUTF8Str, this->lpAsciiStr);	// ASCII and UTF-8 are the same
-			
+			if(!MultiByteToWideChar(CP_ACP, 0, this->lpBytes, -1, lpWCTemp, iWCStrSpaceLen)){
+				break;				// WideChar Transfer Fails
+			}
+			// To utf-8
+			iUTF8StrSpaceLen = WideCharToMultiByte(CP_UTF8, 0, lpWCTemp, -1, NULL, 0, NULL, NULL);
+			if(!iUTF8StrSpaceLen){
+				break;				// UTF8 Space Calculation Fails
+			}
+			lpBytesTemp = new (std::nothrow) char[iUTF8StrSpaceLen];
+			if(!lpBytesTemp){
+				break;				// OOM
+			}
+			if(!WideCharToMultiByte(CP_UTF8, 0, lpWCTemp, -1, lpBytesTemp, iUTF8StrSpaceLen, NULL, NULL)){
+				break;				// Tranfer 2 UTF8 fails
+			}
 			// We succeed here
+			delete[] this->lpBytes;
+			this->lpBytes = lpBytesTemp;
+			lpBytesTemp = NULL;
 			bTransRes = true;
 			break;
 		case Win32String_TYPE_WIDE_CHARACTER:
 			iUTF8StrSpaceLen = WideCharToMultiByte(CP_UTF8, 0, this->lpWChar, -1, NULL, 0, NULL, NULL);
-			if(iUTF8StrSpaceLen == 0){
+			if(!iUTF8StrSpaceLen){
 				break;			// Transfer 2 UTF8 (Space Calculation) fails
 			}
-			this->lpUTF8Str = new (std::nothrow) char[iUTF8StrSpaceLen];
-			if(!this->lpUTF8Str){
+			// Free bytes space if it exists
+			if(!this->lpBytes){
+				delete[] this->lpBytes;
+			}
+			this->lpBytes = new (std::nothrow) char[iUTF8StrSpaceLen];
+			if(!this->lpBytes){
 				break;			// OOM
 			}
-			if(WideCharToMultiByte(CP_UTF8, 0, this->lpWChar, -1, this->lpUTF8Str, iUTF8StrSpaceLen, NULL, NULL) == 0){
+			if(!WideCharToMultiByte(CP_UTF8, 0, this->lpWChar, -1, this->lpBytes, iUTF8StrSpaceLen, NULL, NULL)){
 				break;			// Tranfer 2 UTF8 fails
 			}
 			// We succeed here
@@ -193,6 +243,10 @@ public:
 		if(bTransRes){
 			this->type = Win32String_TYPE_UTF8;
 		}
+		// Release Temperal Variables
+		if(!lpWCTemp){
+			delete[] lpWCTemp;
+		}
 		// Return
 		return bTransRes;
 	}
@@ -201,7 +255,7 @@ public:
 	bool Parse2UTF8(char * & lpUTF8){
 		bool bParseRes = this->Parse2UTF8();
 		if(bParseRes){
-			lpUTF8 = this->lpUTF8Str;
+			lpUTF8 = this->lpBytes;
 		}
 		return bParseRes;
 	}
@@ -212,36 +266,40 @@ public:
 			return true;
 		}
 
+		// Variable Defination
 		int iWCStrSpaceLen = 0;			// This length must include '\0\0'
-		bool bTransRes = false;			// Default is false
-		// Space clean
+		// WChar Space clean
 		if(this->lpWChar != NULL){
 			delete[] this->lpWChar;
 			this->lpWChar = NULL;
 		}
-		
-		// Transfer - based on the type
+		// Chose the code page before transfer
+		UINT uiCodePage = -1;
 		switch(this->type){
 		case Win32String_TYPE_ANSCII:
-			iWCStrSpaceLen = iWCStrSpaceLen = MultiByteToWideChar(CP_ACP, 0, this->lpAsciiStr, -1, NULL, 0);
-			if(!iWCStrSpaceLen){
-				break;				//  Space calculation fails
-			}
-			this->lpWChar = new (std::nothrow) wchar_t[iWCStrSpaceLen];
-			if(!this->lpWChar){
-				break;				// OOM
-			}
-			if(!MultiByteToWideChar(CP_ACP, 0, this->lpAsciiStr, -1, this->lpWChar, iWCStrSpaceLen)){
-				break;				// Tranfer 2 WideChar fails
-			}
-			// We succeed here
-			bTransRes = true;
+			uiCodePage = CP_ACP;
 			break;
 		case Win32String_TYPE_UTF8:
+			uiCodePage = CP_UTF8;
 			break;
 		}
-		
-		return bTransRes;
+		// Space Calculation
+		iWCStrSpaceLen = iWCStrSpaceLen = MultiByteToWideChar(uiCodePage, 0, this->lpBytes, -1, NULL, 0);
+		if(!iWCStrSpaceLen){
+			return false;		//  Space calculation fails
+		}
+		this->lpWChar = new (std::nothrow) wchar_t[iWCStrSpaceLen];
+		if(!this->lpWChar){
+			return false;		// OOM
+		}
+		if(!MultiByteToWideChar(CP_ACP, 0, this->lpBytes, -1, this->lpWChar, iWCStrSpaceLen)){
+			delete[] this->lpWChar;
+			this->lpWChar = NULL;
+			return false;		// Tranfer 2 WideChar fails
+		}
+
+		// We succeed here
+		return true;
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 };
@@ -250,8 +308,30 @@ public:
 //------------------------------------------------------------------------------------------
 // Init static Variables
 //------------------------------------------------------------------------------------------
+int Win32String::defaultType = Win32String_TYPE_ANSCII;									// The default type is ASCII
+
 const int Win32String::TYPE_ANSCII = Win32String_TYPE_ANSCII;
-const int Win32String::TYPE_WIDE_CHARACTER = Win32String_TYPE_WIDE_CHARACTER	;
+const int Win32String::TYPE_WIDE_CHARACTER = Win32String_TYPE_WIDE_CHARACTER;
 const int Win32String::TYPE_UTF8 = Win32String_TYPE_UTF8;
 const int Win32String::TYPE_UTF16_LittleEndian = Win32String_TYPE_UTF16_LittleEndian;
 const int Win32String::TYPE_UNICODE_PAGE1200 = Win32String_TYPE_UTF16_LittleEndian;
+
+//------------------------------------------------------------------------------------------
+// Assistance Functions
+//------------------------------------------------------------------------------------------
+size_t Win32String::BYTES_UTF16BytesNum(const char * bytes){
+	if(!bytes){
+		return 0;
+	}
+	size_t len = 0;
+	while(bytes[len] != '\0' && bytes[len + 1] != '\0'){
+		len += 1;
+	}
+	return len + 2;	// The extra space for '\0\0'
+}
+void Win32String::BYTES_BytesCpy(char * dest, const char * source, size_t len){
+	size_t i;
+	for(i = 0; i < len; i++){
+		dest[i] = source[i];
+	}
+}
