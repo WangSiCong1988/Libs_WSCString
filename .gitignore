@@ -2,6 +2,8 @@
 # Track Workspace Configuration 
 !*.dsw
 !*.dsp
+# No Test Files
+Dist/
 # No Production Files
 Release/**
 # No Debug Files
