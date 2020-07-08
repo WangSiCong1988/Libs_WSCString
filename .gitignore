@@ -1,7 +1,7 @@
 # VC++6.0 Ignore Rules
-# Track Workspace Configuration 
-!*.dsw
-!*.dsp
+# No Workspace Configuration 
+*.dsw
+*.dsp
 # No Test Files
 Dist/
 # No Production Files
