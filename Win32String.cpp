@@ -47,7 +47,6 @@ int main(int argc, char* argv[])
 	
 	// Test Case 1
 	printf("------------------\n");
-	printf("------------------\n");
 	printf("Test Case 1\n");
 	// Create 3 strings
 	Win32String * ws11 = Win32String::Create(); 
@@ -72,8 +71,6 @@ int main(int argc, char* argv[])
 		WriteData2UTF8File("Test_Case_1_ch2utf8.html", ws13_utf8);
 		//ShowCharArray(ws13_utf8);
 	}
-
-	
 	// Release the space
 	if(ws11 != NULL){
 		delete ws11;
@@ -84,8 +81,19 @@ int main(int argc, char* argv[])
 	if(ws13 != NULL){
 		delete ws13;
 	}
-
+	printf("------------------\n\n");
+	
 	printf("------------------\n");
+	printf("Test Case 2\n");
+	Win32String * ws21 = Win32String::Create("Test Case2: Append 测试");
+	printf("ws21 original content is: \"%s\"\n", ws21->GetBytes());
+	ws21->Append(",这是追加的内容", Win32String::TYPE_ASCII);
+	printf("After appending, ws21 content is: \"%s\"\n", ws21->GetBytes());
+	if(ws21){
+		delete ws21;
+	}
+	printf("------------------\n\n");
+
 	printf("\n");
 	printf("\n");
 	printf("\n");

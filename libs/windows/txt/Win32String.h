@@ -7,7 +7,7 @@
 #include <new>
 
 /*** Predefined Values ***/
-#define Win32String_TYPE_ANSCII								0
+#define Win32String_TYPE_ASCII								0
 #define Win32String_TYPE_WIDE_CHARACTER						1
 #define Win32String_TYPE_UTF8								2
 #define Win32String_TYPE_UTF16_LittleEndian					3	// Unicode - code page 1200
@@ -46,7 +46,7 @@ private:
 		}
 		// No OOM
 		this->lpBytes[0] = '\0';
-		this->type = Win32String_TYPE_ANSCII;	// The empty string is ALWAYS ASCII
+		this->type = Win32String_TYPE_ASCII;	// The empty string is ALWAYS ASCII
 		return true;
 	}
 	// Init: An Default string
@@ -58,12 +58,14 @@ private:
 		// Space Calculation
 		size_t bytesNum = 0;
 		switch(this->type){
-		case Win32String_TYPE_ANSCII:
+		case Win32String_TYPE_ASCII:
+			bytesNum = this->STR_ASCIIBytesNum(str);
+			break;
 		case Win32String_TYPE_UTF8:
-			bytesNum = strlen(str)*sizeof(char) + 1;
+			bytesNum = this->STR_UTF8BytesNum(str);
 			break;
 		case Win32String_TYPE_UTF16_LittleEndian:
-			bytesNum = this->BYTES_UTF16BytesNum(str);
+			bytesNum = this->STR_UTF16BytesNum(str);
 			break;
 		}
 
@@ -74,7 +76,7 @@ private:
 			return false;
 		}
 		// No OOM
-		this->BYTES_BytesCpy(this->lpBytes, str, bytesNum);
+		this->STR_BytesCpy(this->lpBytes, str, bytesNum);
 		return true;
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,13 +84,16 @@ private:
 	//-------------------------------------------------------------------------------
 	// Assitance Functions
 	//-------------------------------------------------------------------------------
-	size_t BYTES_UTF16BytesNum(const char * bytes);
-	void BYTES_BytesCpy(char * dest, char * source, size_t len);
-	void BYTES_BytesCpy(char * dest, const char * source, size_t len);
-
+	size_t STR_ASCIIBytesNum(const char * bytes);
+	size_t STR_UTF8BytesNum(const char * bytes);
+	size_t STR_UTF16BytesNum(const char * bytes);
+	void STR_BytesCpy(char * dest, char * source, size_t len);
+	void STR_BytesCpy(char * dest, const char * source, size_t len);
+	void STR_BytesCat(char * dest, char * source, size_t beginIdx, size_t len);
+	void STR_BytesCat(char * dest, const char * source, size_t beginIdx, size_t len);
 public:
 	/*** Coding Types ***/
-	const static int TYPE_ANSCII;
+	const static int TYPE_ASCII;
 	const static int TYPE_WIDE_CHARACTER;
 	const static int TYPE_UTF8;
 	const static int TYPE_UTF16_LittleEndian;
@@ -98,7 +103,7 @@ public:
 	// SetDefaultType
 	//-----------------------------------------------------------------------------
 	static void SetDefaultType(const int type){
-		if(	type == Win32String_TYPE_ANSCII || 
+		if(	type == Win32String_TYPE_ASCII || 
 			type == Win32String_TYPE_WIDE_CHARACTER || 
 			type == Win32String_TYPE_UTF8 ||
 			type == Win32String_TYPE_UTF16_LittleEndian){
@@ -153,6 +158,58 @@ public:
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	
+	/**
+	 * Add extra bytes inside
+	 * @param bytes: the bytes to be appended
+	 * @param type: the extra bytes' type. If it does not fit the type of old bytes, return false
+	 */
+	bool Append(const char * bytes, int type){
+		// Refuse the different type coding
+		if(type != this->type){
+			return false;
+		}
+		// Empty Bytes alway true
+		if(bytes == NULL){
+			return true;
+		}
+		// Calculate the space
+		size_t curNeededBytesNum = 0;		// no space for '\0' or '\0\0'
+		size_t extraBytesNum = 0;
+		switch(this->type){
+		case Win32String_TYPE_ASCII:
+			curNeededBytesNum = this->STR_ASCIIBytesNum(this->lpBytes) - 1;
+			extraBytesNum = this->STR_ASCIIBytesNum(bytes);
+			break;
+		case Win32String_TYPE_UTF8:
+			curNeededBytesNum = this->STR_UTF8BytesNum(this->lpBytes) - 1;
+			extraBytesNum = this->STR_UTF8BytesNum(bytes);
+			break;
+		case Win32String_TYPE_UTF16_LittleEndian:
+			curNeededBytesNum = this->STR_UTF16BytesNum(this->lpBytes) - 2;
+			extraBytesNum = this->STR_UTF16BytesNum(bytes);
+			break;
+		}
+		// Create new space
+		char * lpBytesTMP = new (std::nothrow) char[curNeededBytesNum + extraBytesNum];
+		if(!lpBytesTMP){
+			return false;					// OOM
+		}
+		// Copy
+		this->STR_BytesCpy(lpBytesTMP, this->lpBytes, curNeededBytesNum);
+		this->STR_BytesCat(lpBytesTMP, bytes, curNeededBytesNum, extraBytesNum);
+		// Free old space & link it to the new one
+		delete[] this->lpBytes;
+		this->lpBytes = lpBytesTMP;
+		return true;
+	}
+
+	/**
+	 * Get the bytes
+	 */
+	char * GetBytes(){
+		return this->lpBytes;
+	}
+
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// Type
 	//
@@ -162,7 +219,7 @@ public:
 	}
 	// Type: Is ASCII
 	bool TypeIsASCII(){
-		return this->type == Win32String_TYPE_ANSCII;
+		return this->type == Win32String_TYPE_ASCII;
 	}
 	// Type: Is UTF8
 	bool TypeIsUTF8(){
@@ -188,7 +245,7 @@ public:
 
 		// Transfer - based on the type
 		switch(this->type){
-		case Win32String_TYPE_ANSCII:
+		case Win32String_TYPE_ASCII:
 			// To Wide Char
 			iWCStrSpaceLen = MultiByteToWideChar(CP_ACP, 0, this->lpBytes, -1, NULL, 0);
 			if(!iWCStrSpaceLen){
@@ -276,7 +333,7 @@ public:
 		// Chose the code page before transfer
 		UINT uiCodePage = -1;
 		switch(this->type){
-		case Win32String_TYPE_ANSCII:
+		case Win32String_TYPE_ASCII:
 			uiCodePage = CP_ACP;
 			break;
 		case Win32String_TYPE_UTF8:
@@ -308,9 +365,9 @@ public:
 //------------------------------------------------------------------------------------------
 // Init static Variables
 //------------------------------------------------------------------------------------------
-int Win32String::defaultType = Win32String_TYPE_ANSCII;									// The default type is ASCII
+int Win32String::defaultType = Win32String_TYPE_ASCII;									// The default type is ASCII
 
-const int Win32String::TYPE_ANSCII = Win32String_TYPE_ANSCII;
+const int Win32String::TYPE_ASCII = Win32String_TYPE_ASCII;
 const int Win32String::TYPE_WIDE_CHARACTER = Win32String_TYPE_WIDE_CHARACTER;
 const int Win32String::TYPE_UTF8 = Win32String_TYPE_UTF8;
 const int Win32String::TYPE_UTF16_LittleEndian = Win32String_TYPE_UTF16_LittleEndian;
@@ -319,7 +376,13 @@ const int Win32String::TYPE_UNICODE_PAGE1200 = Win32String_TYPE_UTF16_LittleEndi
 //------------------------------------------------------------------------------------------
 // Assistance Functions
 //------------------------------------------------------------------------------------------
-size_t Win32String::BYTES_UTF16BytesNum(const char * bytes){
+size_t Win32String::STR_ASCIIBytesNum(const char * bytes){
+	return strlen(bytes) + 1;
+}
+size_t Win32String::STR_UTF8BytesNum(const char * bytes){
+	return strlen(bytes) + 1;
+}
+size_t Win32String::STR_UTF16BytesNum(const char * bytes){
 	if(!bytes){
 		return 0;
 	}
@@ -329,9 +392,21 @@ size_t Win32String::BYTES_UTF16BytesNum(const char * bytes){
 	}
 	return len + 2;	// The extra space for '\0\0'
 }
-void Win32String::BYTES_BytesCpy(char * dest, const char * source, size_t len){
+void Win32String::STR_BytesCpy(char * dest, char * source, size_t len){
 	size_t i;
 	for(i = 0; i < len; i++){
 		dest[i] = source[i];
 	}
+}
+void Win32String::STR_BytesCpy(char * dest, const char * source, size_t len){
+	Win32String::STR_BytesCpy(dest, (char * )source, len);
+}
+void Win32String::STR_BytesCat(char * dest, char * source, size_t beginIdx, size_t len){
+	size_t i;
+	for(i = 0; i < len; i++){
+		dest[i + beginIdx] = source[i];
+	}
+}
+void Win32String::STR_BytesCat(char * dest, const char * source, size_t beginIdx, size_t len){
+	Win32String::STR_BytesCat(dest, (char *)source, beginIdx, len);
 }
