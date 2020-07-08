@@ -5,6 +5,7 @@ My personal string header file working in Windows C/C++ (only support English & 
 
 ## 支持的编码
 * WIDE_CHARACTER
+
 仅在内存中使用
 * ASCII
 在中文版Windows系统中，ASCII也可以支持中文。英文、英文标点符号仍采用ASCII编码，但是中文采用别的编码实现。大陆版Windows采用GB2312，台湾版Windows采用Big5
