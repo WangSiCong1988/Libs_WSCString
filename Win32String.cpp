@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <stdlib.h>
 #include <io.h>
 #include <direct.h>
 #include<fstream>
@@ -59,17 +60,18 @@ int main(int argc, char* argv[])
 		printf("ws11 type is ASCII? %s\n", ws11->TypeIsASCII() ? "True" : "False");
 		printf("ws12 type is ASCII? %s\n", ws12->TypeIsASCII() ? "True" : "False");
 		printf("ws13 type is ASCII? %s\n", ws13->TypeIsASCII() ? "True" : "False");
-
+		
 		char * ws12_utf8 = NULL;
 		ws12->Parse2UTF8(ws12_utf8);
 		printf("ws12 parses to utf8 and it has a length of %d\n", strlen(ws12_utf8));
 		printf("ws12(utf8) is \"%s\"\n", ws12_utf8);
-
+		
 		char * ws13_utf8 = NULL;
 		ws13->Parse2UTF8(ws13_utf8);
 		printf("ws13 parses to utf8 and it has a length of %d\nws13(utf8) is \"%s\"\n", strlen(ws13_utf8), ws13_utf8);
 		WriteData2UTF8File("Test_Case_1_ch2utf8.html", ws13_utf8);
 		//ShowCharArray(ws13_utf8);
+		
 	}
 	// Release the space
 	if(ws11 != NULL){
@@ -81,6 +83,7 @@ int main(int argc, char* argv[])
 	if(ws13 != NULL){
 		delete ws13;
 	}
+	
 	printf("------------------\n\n");
 	
 	printf("------------------\n");
