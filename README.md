@@ -16,6 +16,9 @@ My personal string header file working in Windows C/C++ (only support English & 
 ### Windows Code Page Identifiers
 [Windows编码ID](https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers)
 
+## 内存泄漏测试方式
+[使用 CRT 库查找内存泄漏](https://docs.microsoft.com/zh-cn/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2019)
+
 License
 ---
 
