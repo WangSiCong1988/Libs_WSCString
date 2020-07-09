@@ -10,7 +10,8 @@ My personal string header file working in Windows C/C++ (only support English & 
 * `UTF16_LittleEndian`
 * `UTF16_BigEndian`
 * `ISO_8859_1`
-* `GB18030`
+* `GB18030`<br>
+![GB18030字符集编码规则](/img/GB18030字符集.webp)<br>
 * `GB2312`
 
 ### Windows Code Page Identifiers
