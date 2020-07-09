@@ -11,6 +11,7 @@
 # No Intermediate Files
 *.ncb
 *.opt
+*.plg
 
 
 # Prerequisites
