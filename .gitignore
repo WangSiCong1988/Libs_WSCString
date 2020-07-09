@@ -3,11 +3,11 @@
 !*.dsw
 !*.dsp
 # No Test Files
-Dist/
+**/Dist
 # No Production Files
-Release/**
+**/Release
 # No Debug Files
-Debug/**
+**/Debug
 # No Intermediate Files
 *.ncb
 *.opt
