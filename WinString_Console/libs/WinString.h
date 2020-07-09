@@ -6,6 +6,18 @@
 #include <iostream>		// Two libs for "new (std::nothrow)"
 #include <new>
 
+// Memory check
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#ifdef _DEBUG
+    #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+    // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+    // allocations to be of _CLIENT_BLOCK type
+#else
+    #define DBG_NEW new
+#endif
+
 /*** Predefined Values ***/
 // Code Page from https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers
 #define WinString_TYPE_WIDE_CHARACTER						1
@@ -531,7 +543,7 @@ wchar_t * WinString::_PARSE_Bytes2WChar(const char * bytes, UINT type){
 	if(!wcharNum){
 		return NULL;			// Can't calculate the space
 	}
-	lpWCTemp = new wchar_t[wcharNum];
+	lpWCTemp = new (std::nothrow) wchar_t[wcharNum];
 	if(!lpWCTemp){
 		return NULL;			// OOM
 	}
