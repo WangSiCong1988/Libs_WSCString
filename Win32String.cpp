@@ -62,25 +62,28 @@ int main(int argc, char* argv[])
 		printf("ws13 type is ASCII? %s\n", ws13->TypeIsASCII() ? "True" : "False");
 		
 		char * ws12_utf8 = NULL;
-		ws12->Parse2UTF8(ws12_utf8);
+		ws12_utf8 = ws12->Parse2UTF8();
 		printf("ws12 parses to utf8 and it has a length of %d\n", strlen(ws12_utf8));
 		printf("ws12(utf8) is \"%s\"\n", ws12_utf8);
 		
 		char * ws13_utf8 = NULL;
-		ws13->Parse2UTF8(ws13_utf8);
+		ws13_utf8 = ws13->Parse2UTF8();
 		printf("ws13 parses to utf8 and it has a length of %d\nws13(utf8) is \"%s\"\n", strlen(ws13_utf8), ws13_utf8);
 		WriteData2UTF8File("Test_Case_1_ch2utf8.html", ws13_utf8);
+
+		ws13_utf8 = ws13->Parse2UTF8();
+		printf("Parse2UTF8()方法二次调用成功\n");
 		//ShowCharArray(ws13_utf8);
 		
 	}
 	// Release the space
-	if(ws11 != NULL){
+	if(ws11){
 		delete ws11;
 	}
-	if(ws12 != NULL){
+	if(ws12){
 		delete ws12;
 	}
-	if(ws13 != NULL){
+	if(ws13){
 		delete ws13;
 	}
 	
@@ -96,6 +99,18 @@ int main(int argc, char* argv[])
 		delete ws21;
 	}
 	printf("------------------\n\n");
+
+	printf("------------------\n");
+	printf("Test Case 3\n");
+	Win32String * ws31 = Win32String::Create("Test Case3: Append 测试");
+	printf("ws31 is: \"%s\"\n", ws31->GetBytes());
+	DWORD dw31 = 16;
+	ws31->Append(dw31);
+	printf("ws31 (add a DWORD): \"%s\"\n", ws31->GetBytes());
+	if(ws31){
+		delete ws31;
+	}
+	printf("------------------\n");
 
 	printf("\n");
 	printf("\n");
