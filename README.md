@@ -17,8 +17,13 @@ My personal string header file working in Windows C/C++ (only support English & 
 ### Windows Code Page Identifiers
 [Windows编码ID](https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers)
 
-## 内存泄漏测试方式
-[使用 CRT 库查找内存泄漏](https://docs.microsoft.com/zh-cn/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2019)
+## 源代码修改注意事项
+### 内存泄漏测试方式
+[使用 CRT 库查找内存泄漏](https://docs.microsoft.com/zh-cn/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2019)<br>
+CRT库的建议会导致new (str::nothrow)无法被编译器识别，所以编写时new必须采用try catch方式检测失败（设置异常函数的方法被抛弃：因为异常函数编写时可能再发生异常，导致逻辑复杂）
+
+### try catch 异常捕捉采用引用捕捉
+当catch捕捉到异常时，如果采用按值传递，会把异常对象拷贝一次，才专递过来（按引用就没有这个拷贝过程）。异常处理可能工作在内存极度紧张的情况，因此采用按引用传递，减少内存消耗
 
 License
 ---
