@@ -1,6 +1,7 @@
 #pragma once
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>		// strlen, strcpy, strcat
+#include <wchar.h>		// wchar_t
 #include <windows.h>
 
 #include <iostream>		// Two libs for "new (std::nothrow)"

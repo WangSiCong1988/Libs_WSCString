@@ -4,7 +4,25 @@ My personal string header file working in Windows C/C++ (only support English & 
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg?style=flat-square)](https://github.com/996icu/996.ICU/blob/master/LICENSE) [![HitCount](http://hits.dwyl.com/WangSiCong1988/Libs_Win32String.svg)](http://hits.dwyl.com/WangSiCong1988/Libs_Win32String)
 
 ## 支持的编码
-* `WIDE_CHARACTER` 仅在内存中使用
+* `WIDE_CHARACTER` 仅在内存中使用。**<font color="red">注意：这个格式vc/c++中直接使用的格式不同</font>**<br>
+	* VC/C++ wchar_t实现方式<br>
+	vc/c++中的英文字符仍然采用ASCII编码方式。可以设想，其他国家程序员利用vc/c++编写程序输入本国字符时，vc/c++则会采用该国的字符编码方式来处理这些字符。<br>
+	以两字节为单位存放字符，即如果一个字符码为两字节，则在内存中占四字节，字符码为一字节，就占两字节。例如，字符串“中国abc”就存为如下方式:<br>
+	```c++
+	wchar_t str = "中国abc";
+	```
+	![wchar_t 空间分配规则](/img/WideCharSet.bmp)<br>
+
+	* WinString 实现方式<br>
+	WinString中的wchar_t类型采用UTF-16（一个中文字符只占用2个字节），而不是简单的扩充空间版本ASCII编码。所以`printf("%ls")`打印时出现中文编码故障，因此要制定命令行编码方式
+	```
+	setlocale(LC_CTYPE, "chinese-simplified");		// 简体
+	setlocale(LC_CTYPE, "chs");
+	setlocale(LC_CTYPE, "chinese-traditional");		// 繁体，如果不成功，则采用指明区域的繁体
+	setlocale(LC_ALL, "chinese-hongkong");			// 繁体，香港
+	setlocale(LC_CTYPE, "chinese_taiwan.950");		// 繁体，台湾
+
+	```
 * `ASCII` 在中文版Windows系统中，ASCII也可以支持中文。英文、英文标点符号仍采用ASCII编码，但是中文采用别的编码实现。大陆版Windows采用GB2312，台湾版Windows采用Big5
 * `UTF8`
 * `UTF16_LittleEndian`
