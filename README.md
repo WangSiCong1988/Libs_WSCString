@@ -21,7 +21,6 @@ My personal string header file working in Windows C/C++ (only support English & 
 	setlocale(LC_CTYPE, "chinese-traditional");		// 繁体，如果不成功，则采用指明区域的繁体
 	setlocale(LC_ALL, "chinese-hongkong");			// 繁体，香港
 	setlocale(LC_CTYPE, "chinese_taiwan.950");		// 繁体，台湾
-
 	```
 * `ASCII` 在中文版Windows系统中，ASCII也可以支持中文。英文、英文标点符号仍采用ASCII编码，但是中文采用别的编码实现。大陆版Windows采用GB2312，台湾版Windows采用Big5
 * `UTF8`
