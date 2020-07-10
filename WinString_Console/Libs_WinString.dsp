@@ -101,6 +101,10 @@ SOURCE=.\StdAfx.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\libs\WinCRTDebug.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\libs\WinString.h
 # End Source File
 # End Group

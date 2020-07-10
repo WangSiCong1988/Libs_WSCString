@@ -14,18 +14,13 @@
 #define CURPATH  "./Dist/"
 #define CURPATH_FOLDER "./Dist"
 
-// Memory check
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#ifdef _DEBUG
-    #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-    // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
-    // allocations to be of _CLIENT_BLOCK type
-#else
-    #define DBG_NEW new 
-#endif
+#include "./libs/WinCRTDebug.h"	// CRT debug libs
 
+using namespace WinString_0_1_0;
+
+//------------------------------------
+// Assistance Functions
+//------------------------------------
 void PathCheckAndCreate();
 void WriteData2UTF8File(const char * fileName, char * data);	
 void WriteData2UTF8File(const char * fileName, wchar_t * data);
@@ -78,7 +73,7 @@ int main(int argc, char* argv[])
 	printf("Test Case 2\n");
 	WinString * ws21 = WinString::Create("Test Case2: Append 测试");
 	printf("ws21 original content is: \"%s\"\n", ws21->GetBytes());
-	ws21->Append(",这是追加的内容", WinString::TYPE_ASCII);
+	ws21->Append(",这是追加的内容", WinString::STR_TYPE_ASCII);
 	printf("After appending, ws21 content is: \"%s\"\n", ws21->GetBytes());
 	if(ws21){
 		delete ws21;
