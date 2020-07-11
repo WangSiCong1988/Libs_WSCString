@@ -14,7 +14,17 @@
 #define CURPATH  "./Dist/"
 #define CURPATH_FOLDER "./Dist"
 
-#include "./libs/WinCRTDebug.h"	// CRT debug libs
+// Memory check
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#ifdef _DEBUG
+    #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+    // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+    // allocations to be of _CLIENT_BLOCK type
+#else
+    #define DBG_NEW new
+#endif
 
 using namespace WinString_0_1_0;
 
@@ -58,15 +68,9 @@ int main(int argc, char* argv[])
 	printf("Parse2UTF8()方法二次调用成功\n");
 	//ShowCharArray(ws13_utf8);
 	// Release the space
-	if(ws11){
-		delete ws11;
-	}
-	if(ws12){
-		delete ws12;
-	}
-	if(ws13){
-		delete ws13;
-	}
+	WinString::Destroy(ws11);
+	WinString::Destroy(ws12);
+	WinString::Destroy(ws13);
 	
 	printf("------------------\n\n");
 	
@@ -76,9 +80,7 @@ int main(int argc, char* argv[])
 	printf("ws21 original content is: \"%s\"\n", ws21->GetBytes());
 	ws21->Append(",这是追加的内容", WinString::STR_TYPE_ASCII);
 	printf("After appending, ws21 content is: \"%s\"\n", ws21->GetBytes());
-	if(ws21){
-		delete ws21;
-	}
+	WinString::Destroy(ws21);
 	printf("------------------\n\n");
 
 	printf("------------------\n");
@@ -90,13 +92,11 @@ int main(int argc, char* argv[])
 	printf("ws31 (add a DWORD): \"%s\"\n", ws31->GetBytes());
 
 	//setlocale(LC_CTYPE, "chinese_taiwan.950");
-	//setlocale(LC_CTYPE, "chs");
-	setlocale(LC_CTYPE, "chinese-traditional");
+	setlocale(LC_CTYPE, "chs");
+	//setlocale(LC_CTYPE, "chinese-traditional");
 	printf("ws31 转换到宽字符是\"%ls\"\n", ws31->Parse2WideChar());
 	printf("ws31 第二次转换到宽字符是\"%ls\"\n", ws31->Parse2WideChar());
-	if(ws31){
-		delete ws31;
-	}
+	WinString::Destroy(ws31);
 	printf("------------------\n");
 
 	printf("\n");

@@ -7,7 +7,17 @@
 #include <iostream>		// Two libs for "new (std::nothrow)"
 #include <new>
 
-#include "./libs/WinCRTDebug.h"	// CRT debug libs
+// Memory check
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#ifdef _DEBUG
+    #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+    // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+    // allocations to be of _CLIENT_BLOCK type
+#else
+    #define DBG_NEW new
+#endif
 
 /**
  * ClassName: WinString
@@ -71,6 +81,7 @@ namespace WinString_0_1_0{
 		//-------------------------------------------------------------------------------
 		/* Construction */
 		WinString();
+		~WinString();
 		/* Init */
 		bool Init();					// Init an empty string, set it to ASCII
 		bool Init(const char * str);	// Init a string from given bytes (thoses bytes are supposed to be the same as the default type)
@@ -88,15 +99,12 @@ namespace WinString_0_1_0{
 		*/
 		static bool SetDefaultType(const UINT type);
 
-		/**
-		 * Deconstruct
-		 */
-		~WinString();
-
 		/* Create */
 		static WinString * Create();					// Create: An empty ASCII string
 		static WinString * Create(const char * str);	// Create: An Default String
-		
+		/* Destroy */
+		static void Destroy(WinString * lp);
+
 		/**
 		 * Add extra bytes inside
 		 * @param bytes: the bytes to be appended
@@ -142,6 +150,17 @@ namespace WinString_0_1_0{
 		this->lpWChar = NULL;
 		this->lpBytes = NULL;
 		this->type = WinString::defaultType;	// The default type
+	}
+	/**
+	 * Deconstruct
+	 */
+	WinString::~WinString(){
+		if(this->lpWChar != NULL){
+			delete[] this->lpWChar;
+		}
+		if(this->lpBytes != NULL){
+			delete[] this->lpBytes;
+		}
 	}
 
 	/**
@@ -216,17 +235,7 @@ namespace WinString_0_1_0{
 		return false;
 	}
 
-	/**
-	 * Deconstruct
-	 */
-	WinString::~WinString(){
-		if(this->lpWChar != NULL){
-			delete[] this->lpWChar;
-		}
-		if(this->lpBytes != NULL){
-			delete[] this->lpBytes;
-		}
-	}
+	
 
 	//------------------------------------------------------------------------------
 	// Create
@@ -260,6 +269,11 @@ namespace WinString_0_1_0{
 		}
 		// All good
 		return lpWin32Str;
+	}
+	void WinString::Destroy(WinString * lp){
+		if(lp){
+			delete lp;
+		}
 	}
 	
 	/**
