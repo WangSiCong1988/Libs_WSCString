@@ -1,3 +1,7 @@
+# 忽略生成脚本的目录
+/prod/*
+prod/*
+
 # VC++6.0 Ignore Rules
 # Track Workspace Configuration 
 !*.dsw
