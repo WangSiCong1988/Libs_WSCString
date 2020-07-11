@@ -33,8 +33,7 @@ namespace WinString_0_1_0{
 	const UINT TYPE_WCHAR_T =				203;
 	const UINT TYPE_WINSTRING =				204;
 
-	// This STRING class is designed to transfer Unicode into UTF-8
-	// Chinese Character in ASCII is actually coded in GB2312
+	/*** Class Definition ***/
 	class WinString{
 	private:
 		//-------------------------------------------------------------------------------
@@ -70,341 +69,119 @@ namespace WinString_0_1_0{
 		//-------------------------------------------------------------------------------
 		// 私有方法
 		//-------------------------------------------------------------------------------
-		/**
-		 * Construction
-		 */
-		WinString(){
-			this->lpWChar = NULL;
-			this->lpBytes = NULL;
-			this->type = WinString::defaultType;	// The default type
-		}
-
-		/**
-		 * Init
-		 * @description: init an empty string, set it to ASCII
-		 */
-		bool Init(){
-			this->lpBytes = (char *)WinString::_MemoryApply(1, TYPE_CHAR);
-			// Fail for OOM
-			if(!this->lpBytes){
-				return false;
-			}
-			// No OOM
-			this->lpBytes[0] = '\0';
-			this->type = TYPE_ASCII;	// The empty string is ALWAYS ASCII
-			return true;
-		}
-		/**
-		 * Init
-		 * @description: init a string from given bytes (thoses bytes are supposed to be the same as the default type)
-		 */
-		bool Init(const char * str){
-			// Empty Input, so an empty string
-			if(!str){
-				return Init();
-			}
-			
-			size_t bytesNum = WinString::_STR_BytesNum(str, this->type);	// Space calculation (we can't get 0 here because NULL is handled before)
-			this->lpBytes = (char *)WinString::_MemoryApply(bytesNum, TYPE_CHAR);
-			// Fail for OOM
-			if(!this->lpBytes){
-				return false;
-			}
-			// No OOM
-			WinString::_STR_BytesCpy(this->lpBytes, str, bytesNum);
-			return true;
-		}
-
-		
+		/* Construction */
+		WinString();
+		/* Init */
+		bool Init();					// Init an empty string, set it to ASCII
+		bool Init(const char * str);	// Init a string from given bytes (thoses bytes are supposed to be the same as the default type)
 	public:
 		/*** Coding Types ***/
 		const static UINT STR_TYPE_ASCII;
 		const static UINT STR_TYPE_WIDE_CHARACTER;
 		const static UINT STR_TYPE_UTF8;
 		const static UINT STR_TYPE_UTF16_LittleEndian;	// utf16, little endian
-		const static UINT STR_TYPE_UNICODE_PAGE1200;		// utf16, little endian
+		const static UINT STR_TYPE_UNICODE_PAGE1200;	// utf16, little endian
 		const static UINT STR_TYPE_UNICODE;				// utf16, little endian
 		
-		/**
-		 * SetDefaultType
+		/* SetDefaultType
 		 * @param type: the code type in your source files 
-		 */
-		static bool SetDefaultType(const UINT type){
-			// 如果类型是支持的则更改，否则返回false
-			if(	type == TYPE_ASCII || 
-				type == TYPE_WIDE_CHARACTER || 
-				type == TYPE_UTF8 ||
-				type == TYPE_UTF16_LittleEndian ||
-				type == TYPE_UTF16_BigEndian || 
-				type == TYPE_ISO_8859_1 ||
-				type == TYPE_GB18030 ||
-				type == TYPE_GB2312
-				){
-				WinString::defaultType = type;
-				return true;
-			}
-			return false;
-		}
+		*/
+		static bool SetDefaultType(const UINT type);
 
 		/**
 		 * Deconstruct
 		 */
-		~WinString(){
-			if(this->lpWChar != NULL){
-				delete[] this->lpWChar;
-			}
-			if(this->lpBytes != NULL){
-				delete[] this->lpBytes;
-			}
-		}
+		~WinString();
 
-		//------------------------------------------------------------------------------
-		// Create
-		//
-		// Create: An empty ASCII string
-		static WinString * Create(){
-			WinString * lpWin32Str = (WinString * )WinString::_MemoryApply(1, TYPE_WINSTRING);
-			// OOM
-			if(!lpWin32Str){
-				return NULL;
-			}
-			// Init fails
-			if(!lpWin32Str->Init()){
-				delete lpWin32Str;
-				return NULL;
-			}
-			// All good
-			return lpWin32Str; 
-		}
-		// Create: An Default String
-		static WinString * Create(const char * str){
-			WinString * lpWin32Str = (WinString * )WinString::_MemoryApply(1, TYPE_WINSTRING);
-			// OOM
-			if(!lpWin32Str){
-				return NULL;
-			}
-			// Init fails
-			if(!lpWin32Str->Init(str)){
-				delete lpWin32Str;
-				return NULL;
-			}
-			// All good
-			return lpWin32Str;
-		}
-		//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		/* Create */
+		static WinString * Create();					// Create: An empty ASCII string
+		static WinString * Create(const char * str);	// Create: An Default String
 		
 		/**
 		 * Add extra bytes inside
 		 * @param bytes: the bytes to be appended
 		 * @param type: the extra bytes' type. If it does not fit the type of old bytes, return false
 		 */
-		bool Append(const char * bytes, UINT type){
-			// Refuse the different type coding
-			if(type != this->type){
-				return false;
-			}
-			// Empty Bytes alway true
-			if(bytes == NULL){
-				return true;
-			}
-			// 计算空间，这个时候this->lpBytes至少会有1个byte的空间。如果是用wchar_t初始化会被前面的过程拒绝（因为wchar_t不能直接追加char）
-			size_t curNeededBytesNum = WinString::_STR_BytesNumWithoutEOS(this->lpBytes, this->type);	// Not include EOS (end of string)
-			size_t extraBytesNum = WinString::_STR_BytesNum(bytes, this->type);
-		
-			// Create new space
-			char * lpBytesTMP = (char *)WinString::_MemoryApply(curNeededBytesNum + extraBytesNum, TYPE_CHAR);
-			if(!lpBytesTMP){
-				return false;					// OOM
-			}
-			// Copy
-			WinString::_STR_BytesCpy(lpBytesTMP, this->lpBytes, curNeededBytesNum);
-			WinString::_STR_BytesCat(lpBytesTMP, bytes, curNeededBytesNum, extraBytesNum);
-			// Free old space & link it to the new one
-			delete[] this->lpBytes;				// 释放旧空间（这里不需要检查指针是否为空，因为只有）
-			this->lpBytes = lpBytesTMP;
-			return true;
-		}
+		bool Append(const char * bytes, UINT type);
 		/**
 		 * Add extra bytes inside
 		 * @param dw: a DWORD will be added and it will be shown in Hex digits
 		 */
-		bool Append(DWORD dw){
-			char * lpASCIIBytes			= NULL;
-			wchar_t * wcExtra			= NULL;
-			wchar_t * lpWCharNew		= NULL;
-			char * bytesExtra			= NULL;
-			char * lpBytesNew			= NULL;
-			size_t oldNeededWCharLen	= 0;
-			size_t extraWcharLen		= 0;
-			size_t oldNeededBytesLen	= 0;
-			size_t extraBytesLen		= 0;
-			bool res = false;
-
-			
-			lpASCIIBytes = (char *)WinString::_MemoryApply(2 + DWORD_BYTESNUM*2 + 1, TYPE_CHAR);					// Apply space for ASCII bytes
-			if(lpASCIIBytes){
-				sprintf(lpASCIIBytes, "0x%04x", dw);														// Change DWORD to ASCII bytes
-				wcExtra = WinString::_PARSE_Bytes2WChar(lpASCIIBytes, TYPE_ASCII);							// Change ASCII bytes to wide char
-				if(wcExtra){
-					if(this->type == TYPE_WIDE_CHARACTER){
-						// Wide char
-						oldNeededWCharLen = WinString::_STR_WCharsNumWithoutEOS(this->lpWChar);
-						extraWcharLen = WinString::_STR_WCharsNum(this->lpWChar);
-						lpWCharNew = (wchar_t *)WinString::_MemoryApply(oldNeededWCharLen + extraWcharLen, TYPE_WCHAR_T);
-						if(lpWCharNew){
-							// Copy
-							WinString::_STR_WCharsCpy(lpWCharNew, this->lpWChar, oldNeededWCharLen);
-							WinString::_STR_WCharsCat(lpWCharNew, wcExtra, oldNeededWCharLen, extraWcharLen);
-							// Release old space & link it to the new one
-							delete[] this->lpWChar;
-							this->lpWChar = lpWCharNew;
-							lpWCharNew = NULL;
-							// Set success
-							res = true;
-						}
-					}else{
-						// Other coding
-						bytesExtra = WinString::_PARSE_WChar2Bytes(wcExtra, this->type);
-						if(bytesExtra){
-							oldNeededBytesLen = WinString::_STR_BytesNumWithoutEOS(this->lpBytes, this->type);
-							extraBytesLen = WinString::_STR_BytesNum(bytesExtra, this->type);
-							lpBytesNew = (char *)WinString::_MemoryApply(oldNeededBytesLen + extraBytesLen, TYPE_CHAR);
-							if(lpBytesNew){
-								// Copy
-								WinString::_STR_BytesCpy(lpBytesNew, this->lpBytes, oldNeededBytesLen);
-								WinString::_STR_BytesCat(lpBytesNew, bytesExtra, oldNeededBytesLen, extraBytesLen);
-								// Release space
-								delete[] this->lpBytes;
-								this->lpBytes = lpBytesNew;
-								lpBytesNew = NULL;
-								// Set success
-								res = true;
-							}
-						}
-					}
-				}
-			}
-			// Release temporal space
-			if(lpASCIIBytes){
-				delete[] lpASCIIBytes;
-			}
-			if(wcExtra){
-				delete[] wcExtra;
-			}
-			if(lpWCharNew){
-				delete[] lpWCharNew;
-			}
-			if(bytesExtra){
-				delete[] bytesExtra;
-			}
-			if(lpBytesNew){
-				delete[] lpBytesNew	;
-			}
-			// Return
-			return res;
-		}
+		bool Append(DWORD dw);
 
 		/**
 		 * Get the bytes
 		 */
-		char * GetBytes(){
-			return this->lpBytes;
-		}
-
-		//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		// Type
-		//
-		// Type: Is WideChar
-		bool TypeIsWideChar(){
-			return this->type == TYPE_WIDE_CHARACTER;
-		}
-		// Type: Is ASCII
-		bool TypeIsASCII(){
-			return this->type == TYPE_ASCII;
-		}
-		// Type: Is UTF8
-		bool TypeIsUTF8(){
-			return this->type == TYPE_UTF8;
-		}
-		//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		char * GetBytes();
+		
+		/* Type */
+		bool TypeIsWideChar();	// Type: Is WideChar
+		bool TypeIsASCII();		// Type: Is ASCII
+		bool TypeIsUTF8();		// Type: Is UTF8
 
 		/**
 		 * Parse to UTF8
 		 * @return: NULL, fail; not NULL, succeed
 		 */
-		char * Parse2UTF8(){
-			wchar_t * lpWCTemp = NULL;
-			char * lpBytesTemp = NULL;
-			char * utf8Bytes = NULL;			// Default is NULL
-
-			// If it is already utf8, just return those bytes
-			if(this->TypeIsUTF8()){ 
-				return this->lpBytes;
-			}	
-
-			// Transfer - based on the type
-			if(this->type == TYPE_WIDE_CHARACTER){
-				// Begin with Wide Chars
-				lpBytesTemp = WinString::_PARSE_WChar2Bytes(this->lpWChar, TYPE_UTF8);
-				// Succeed!	
-				if(lpBytesTemp){
-					if(this->lpBytes){ delete[] this->lpBytes; }	// Free old space
-					this->lpBytes = lpBytesTemp;					// Link bytes pointer to the new one
-					lpBytesTemp = NULL;
-					utf8Bytes = this->lpBytes;				// Return pointer has value now
-				}
-			}else{
-				// Begin with other coding bytes (此时this->lpBytes至少有一个字符'\0')
-				lpWCTemp = WinString::_PARSE_Bytes2WChar(this->lpBytes, this->type);
-				if(lpWCTemp){
-					lpBytesTemp = WinString::_PARSE_WChar2Bytes(lpWCTemp, TYPE_UTF8);
-					// Succeed! 
-					if(lpBytesTemp){
-						// Free old space & link it to the new one	
-						delete[] this->lpBytes;
-						this->lpBytes = lpBytesTemp;
-						lpBytesTemp = NULL;
-						utf8Bytes = this->lpBytes;			// Return pointer has value now
-					}	
-				}	
-			}
-			// If succeed, set type to UTF8
-			if(utf8Bytes){
-				this->type = TYPE_UTF8;
-			}
-			// Release Temperal Variables
-			if(lpWCTemp){ delete[] lpWCTemp; }
-			if(lpBytesTemp){ delete[] lpBytesTemp; }
-
-			// Return
-			return utf8Bytes;
-		}
+		char * Parse2UTF8();
 
 		/**
 		 * Parse to WideChar
 		 */
-		wchar_t * Parse2WideChar(){
-			// No transfer if it is
-			if(this->TypeIsWideChar()){
-				return this->lpWChar;
-			}
-			// If WChar space exist, delete it
-			if(this->lpWChar){ 
-				delete[] this->lpWChar;
-				this->lpWChar = NULL;
-			}
-			// Try to change to wide char
-			this->lpWChar = WinString::_PARSE_Bytes2WChar(this->lpBytes, this->type);
-			// If succeed, set type to WideChar
-			if(this->lpWChar){ this->type = TYPE_WIDE_CHARACTER; }
-			// Return
-			return this->lpWChar;
-		}
+		wchar_t * Parse2WideChar();
 	};
 
+	/*** Class Realisation ***/
+	//-------------------------------------------------------------------------------
+	// 私有方法
+	//-------------------------------------------------------------------------------
+	/**
+	 * Construction
+	 */
+	 WinString::WinString(){
+		this->lpWChar = NULL;
+		this->lpBytes = NULL;
+		this->type = WinString::defaultType;	// The default type
+	}
+
+	/**
+	 * Init
+	 * @description: init an empty string, set it to ASCII
+	 */
+	bool WinString::Init(){
+		this->lpBytes = (char *)WinString::_MemoryApply(1, TYPE_CHAR);
+		// Fail for OOM
+		if(!this->lpBytes){
+			return false;
+		}
+		// No OOM
+		this->lpBytes[0] = '\0';
+		this->type = TYPE_ASCII;	// The empty string is ALWAYS ASCII
+		return true;
+	}
+	/**
+	 * Init
+	 * @description: init a string from given bytes (thoses bytes are supposed to be the same as the default type)
+	 */
+	bool WinString::Init(const char * str){
+		// Empty Input, so an empty string
+		if(!str){
+			return Init();
+		}
+		
+		size_t bytesNum = WinString::_STR_BytesNum(str, this->type);	// Space calculation (we can't get 0 here because NULL is handled before)
+		this->lpBytes = (char *)WinString::_MemoryApply(bytesNum, TYPE_CHAR);
+		// Fail for OOM
+		if(!this->lpBytes){
+			return false;
+		}
+		// No OOM
+		WinString::_STR_BytesCpy(this->lpBytes, str, bytesNum);
+		return true;
+	}
 
 	//------------------------------------------------------------------------------------------
-	// Init static Variables
+	// 公有静态变量
 	//------------------------------------------------------------------------------------------
 	UINT WinString::defaultType = TYPE_ASCII;									// The default type is ASCII
 
@@ -414,6 +191,285 @@ namespace WinString_0_1_0{
 	const UINT WinString::STR_TYPE_UTF16_LittleEndian = TYPE_UTF16_LittleEndian;
 	const UINT WinString::STR_TYPE_UNICODE_PAGE1200 = TYPE_UTF16_LittleEndian;
 	const UINT WinString::STR_TYPE_UNICODE = TYPE_UTF16_LittleEndian;
+		
+	//-------------------------------------------------------------------------------
+	// 公有方法
+	//-------------------------------------------------------------------------------
+	/**
+	 * SetDefaultType
+	 * @param type: the code type in your source files 
+	 */
+	bool WinString::SetDefaultType(const UINT type){
+		// 如果类型是支持的则更改，否则返回false
+		if(	type == TYPE_ASCII || 
+			type == TYPE_WIDE_CHARACTER || 
+			type == TYPE_UTF8 ||
+			type == TYPE_UTF16_LittleEndian ||
+			type == TYPE_UTF16_BigEndian || 
+			type == TYPE_ISO_8859_1 ||
+			type == TYPE_GB18030 ||
+			type == TYPE_GB2312
+			){
+			WinString::defaultType = type;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Deconstruct
+	 */
+	WinString::~WinString(){
+		if(this->lpWChar != NULL){
+			delete[] this->lpWChar;
+		}
+		if(this->lpBytes != NULL){
+			delete[] this->lpBytes;
+		}
+	}
+
+	//------------------------------------------------------------------------------
+	// Create
+	//
+	// Create: An empty ASCII string
+	WinString * WinString::Create(){
+		WinString * lpWin32Str = (WinString * )WinString::_MemoryApply(1, TYPE_WINSTRING);
+		// OOM
+		if(!lpWin32Str){
+			return NULL;
+		}
+		// Init fails
+		if(!lpWin32Str->Init()){
+			delete lpWin32Str;
+			return NULL;
+		}
+		// All good
+		return lpWin32Str; 
+	}
+	// Create: An Default String
+	WinString * WinString::Create(const char * str){
+		WinString * lpWin32Str = (WinString * )WinString::_MemoryApply(1, TYPE_WINSTRING);
+		// OOM
+		if(!lpWin32Str){
+			return NULL;
+		}
+		// Init fails
+		if(!lpWin32Str->Init(str)){
+			delete lpWin32Str;
+			return NULL;
+		}
+		// All good
+		return lpWin32Str;
+	}
+	
+	/**
+	 * Add extra bytes inside
+	 * @param bytes: the bytes to be appended
+	 * @param type: the extra bytes' type. If it does not fit the type of old bytes, return false
+	 */
+	bool WinString::Append(const char * bytes, UINT type){
+		// Refuse the different type coding
+		if(type != this->type){
+			return false;
+		}
+		// Empty Bytes alway true
+		if(bytes == NULL){
+			return true;
+		}
+		// 计算空间，这个时候this->lpBytes至少会有1个byte的空间。如果是用wchar_t初始化会被前面的过程拒绝（因为wchar_t不能直接追加char）
+		size_t curNeededBytesNum = WinString::_STR_BytesNumWithoutEOS(this->lpBytes, this->type);	// Not include EOS (end of string)
+		size_t extraBytesNum = WinString::_STR_BytesNum(bytes, this->type);
+	
+		// Create new space
+		char * lpBytesTMP = (char *)WinString::_MemoryApply(curNeededBytesNum + extraBytesNum, TYPE_CHAR);
+		if(!lpBytesTMP){
+			return false;					// OOM
+		}
+		// Copy
+		WinString::_STR_BytesCpy(lpBytesTMP, this->lpBytes, curNeededBytesNum);
+		WinString::_STR_BytesCat(lpBytesTMP, bytes, curNeededBytesNum, extraBytesNum);
+		// Free old space & link it to the new one
+		delete[] this->lpBytes;				// 释放旧空间（这里不需要检查指针是否为空，因为只有）
+		this->lpBytes = lpBytesTMP;
+		return true;
+	}
+	/**
+	 * Add extra bytes inside
+	 * @param dw: a DWORD will be added and it will be shown in Hex digits
+	 */
+	bool WinString::Append(DWORD dw){
+		char * lpASCIIBytes			= NULL;
+		wchar_t * wcExtra			= NULL;
+		wchar_t * lpWCharNew		= NULL;
+		char * bytesExtra			= NULL;
+		char * lpBytesNew			= NULL;
+		size_t oldNeededWCharLen	= 0;
+		size_t extraWcharLen		= 0;
+		size_t oldNeededBytesLen	= 0;
+		size_t extraBytesLen		= 0;
+		bool res = false;
+
+		
+		lpASCIIBytes = (char *)WinString::_MemoryApply(2 + DWORD_BYTESNUM*2 + 1, TYPE_CHAR);					// Apply space for ASCII bytes
+		if(lpASCIIBytes){
+			sprintf(lpASCIIBytes, "0x%04x", dw);														// Change DWORD to ASCII bytes
+			wcExtra = WinString::_PARSE_Bytes2WChar(lpASCIIBytes, TYPE_ASCII);							// Change ASCII bytes to wide char
+			if(wcExtra){
+				if(this->type == TYPE_WIDE_CHARACTER){
+					// Wide char
+					oldNeededWCharLen = WinString::_STR_WCharsNumWithoutEOS(this->lpWChar);
+					extraWcharLen = WinString::_STR_WCharsNum(this->lpWChar);
+					lpWCharNew = (wchar_t *)WinString::_MemoryApply(oldNeededWCharLen + extraWcharLen, TYPE_WCHAR_T);
+					if(lpWCharNew){
+						// Copy
+						WinString::_STR_WCharsCpy(lpWCharNew, this->lpWChar, oldNeededWCharLen);
+						WinString::_STR_WCharsCat(lpWCharNew, wcExtra, oldNeededWCharLen, extraWcharLen);
+						// Release old space & link it to the new one
+						delete[] this->lpWChar;
+						this->lpWChar = lpWCharNew;
+						lpWCharNew = NULL;
+						// Set success
+						res = true;
+					}
+				}else{
+					// Other coding
+					bytesExtra = WinString::_PARSE_WChar2Bytes(wcExtra, this->type);
+					if(bytesExtra){
+						oldNeededBytesLen = WinString::_STR_BytesNumWithoutEOS(this->lpBytes, this->type);
+						extraBytesLen = WinString::_STR_BytesNum(bytesExtra, this->type);
+						lpBytesNew = (char *)WinString::_MemoryApply(oldNeededBytesLen + extraBytesLen, TYPE_CHAR);
+						if(lpBytesNew){
+							// Copy
+							WinString::_STR_BytesCpy(lpBytesNew, this->lpBytes, oldNeededBytesLen);
+							WinString::_STR_BytesCat(lpBytesNew, bytesExtra, oldNeededBytesLen, extraBytesLen);
+							// Release space
+							delete[] this->lpBytes;
+							this->lpBytes = lpBytesNew;
+							lpBytesNew = NULL;
+							// Set success
+							res = true;
+						}
+					}
+				}
+			}
+		}
+		// Release temporal space
+		if(lpASCIIBytes){
+			delete[] lpASCIIBytes;
+		}
+		if(wcExtra){
+			delete[] wcExtra;
+		}
+		if(lpWCharNew){
+			delete[] lpWCharNew;
+		}
+		if(bytesExtra){
+			delete[] bytesExtra;
+		}
+		if(lpBytesNew){
+			delete[] lpBytesNew	;
+		}
+		// Return
+		return res;
+	}
+
+	/**
+	 * Get the bytes
+	 */
+	char * WinString::GetBytes(){
+		return this->lpBytes;
+	}
+
+	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// Type
+	//
+	// Type: Is WideChar
+	bool WinString::TypeIsWideChar(){
+		return this->type == TYPE_WIDE_CHARACTER;
+	}
+	// Type: Is ASCII
+	bool WinString::TypeIsASCII(){
+		return this->type == TYPE_ASCII;
+	}
+	// Type: Is UTF8
+	bool WinString::TypeIsUTF8(){
+		return this->type == TYPE_UTF8;
+	}
+	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Parse to UTF8
+	 * @return: NULL, fail; not NULL, succeed
+	 */
+	char * WinString::Parse2UTF8(){
+		wchar_t * lpWCTemp = NULL;
+		char * lpBytesTemp = NULL;
+		char * utf8Bytes = NULL;			// Default is NULL
+
+		// If it is already utf8, just return those bytes
+		if(this->TypeIsUTF8()){ 
+			return this->lpBytes;
+		}	
+
+		// Transfer - based on the type
+		if(this->type == TYPE_WIDE_CHARACTER){
+			// Begin with Wide Chars
+			lpBytesTemp = WinString::_PARSE_WChar2Bytes(this->lpWChar, TYPE_UTF8);
+			// Succeed!	
+			if(lpBytesTemp){
+				if(this->lpBytes){ delete[] this->lpBytes; }	// Free old space
+				this->lpBytes = lpBytesTemp;					// Link bytes pointer to the new one
+				lpBytesTemp = NULL;
+				utf8Bytes = this->lpBytes;				// Return pointer has value now
+			}
+		}else{
+			// Begin with other coding bytes (此时this->lpBytes至少有一个字符'\0')
+			lpWCTemp = WinString::_PARSE_Bytes2WChar(this->lpBytes, this->type);
+			if(lpWCTemp){
+				lpBytesTemp = WinString::_PARSE_WChar2Bytes(lpWCTemp, TYPE_UTF8);
+				// Succeed! 
+				if(lpBytesTemp){
+					// Free old space & link it to the new one	
+					delete[] this->lpBytes;
+					this->lpBytes = lpBytesTemp;
+					lpBytesTemp = NULL;
+					utf8Bytes = this->lpBytes;			// Return pointer has value now
+				}	
+			}	
+		}
+		// If succeed, set type to UTF8
+		if(utf8Bytes){
+			this->type = TYPE_UTF8;
+		}
+		// Release Temperal Variables
+		if(lpWCTemp){ delete[] lpWCTemp; }
+		if(lpBytesTemp){ delete[] lpBytesTemp; }
+
+		// Return
+		return utf8Bytes;
+	}
+
+	/**
+	 * Parse to WideChar
+	 */
+	wchar_t * WinString::Parse2WideChar(){
+		// No transfer if it is
+		if(this->TypeIsWideChar()){
+			return this->lpWChar;
+		}
+		// If WChar space exist, delete it
+		if(this->lpWChar){ 
+			delete[] this->lpWChar;
+			this->lpWChar = NULL;
+		}
+		// Try to change to wide char
+		this->lpWChar = WinString::_PARSE_Bytes2WChar(this->lpBytes, this->type);
+		// If succeed, set type to WideChar
+		if(this->lpWChar){ this->type = TYPE_WIDE_CHARACTER; }
+		// Return
+		return this->lpWChar;
+	}
+
 
 	//------------------------------------------------------------------------------------------
 	// Assistance Functions
