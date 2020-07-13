@@ -33,7 +33,7 @@ My personal string header file working in Windows C/C++ (only support English & 
 	```c++
 	wchar_t str = "中国abc";
 	```
-	![wchar_t 空间分配规则][./img/wchar_t空间分配规则.bmp]<br>
+	![wchar_t 空间分配规则][/img/wchar_t空间分配规则.bmp]<br>
 
 	* WinString 实现方式<br>
 	WinString中的wchar_t类型采用UTF-16（一个中文字符只占用2个字节），而不是简单的扩充空间版本ASCII编码。所以`printf("%ls")`打印时出现中文编码故障，因此要制定命令行编码方式
@@ -50,7 +50,7 @@ My personal string header file working in Windows C/C++ (only support English & 
 * `UTF16_BigEndian`
 * `ISO_8859_1`
 * `GB18030`<br>
-![GB18030字符集编码规则][./img/GB18030字符集编码规则.webp]<br>
+![GB18030字符集编码规则][/img/GB18030字符集编码规则.webp]<br>
 * `GB2312`
 
 ### Windows Code Page Identifiers
