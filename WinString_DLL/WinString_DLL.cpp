@@ -130,7 +130,7 @@ const UINT WinString::STR_TYPE_UNICODE = TYPE_UTF16_LittleEndian;
  * SetDefaultType
  * @param type: the code type in your source files 
  */
-bool WinString::SetDefaultType(const UINT type){
+bool _stdcall WinString::SetDefaultType(const UINT type){
 	// 如果类型是支持的则更改，否则返回false
 	if(	type == TYPE_ASCII || 
 		type == TYPE_WIDE_CHARACTER || 
@@ -152,7 +152,7 @@ bool WinString::SetDefaultType(const UINT type){
 // Create
 //
 // Create: An empty ASCII string
-WinString * WinString::Create(){
+WinString * _stdcall WinString::Create(){
 	WinString * lpWin32Str = (WinString * )WinString::_MemoryApply(1, TYPE_WINSTRING);
 	// OOM
 	if(!lpWin32Str){
@@ -167,7 +167,7 @@ WinString * WinString::Create(){
 	return lpWin32Str; 
 }
 // Create: An Default String
-WinString * WinString::Create(const char * str){
+WinString * _stdcall WinString::Create(const char * str){
 	WinString * lpWin32Str = (WinString * )WinString::_MemoryApply(1, TYPE_WINSTRING);
 	// OOM
 	if(!lpWin32Str){
@@ -185,7 +185,7 @@ WinString * WinString::Create(const char * str){
 /**
  * Destroy
  */
-void WinString::Destroy(WinString * lp){
+void _stdcall WinString::Destroy(WinString * lp){
 	if(lp){
 		delete lp;
 	}
@@ -196,7 +196,7 @@ void WinString::Destroy(WinString * lp){
  * @param bytes: the bytes to be appended
  * @param type: the extra bytes' type. If it does not fit the type of old bytes, return false
  */
-bool WinString::Append(const char * bytes, UINT type){
+bool _stdcall WinString::Append(const char * bytes, UINT type){
 	// Refuse the different type coding
 	if(type != this->type){
 		return false;
@@ -226,7 +226,7 @@ bool WinString::Append(const char * bytes, UINT type){
  * Add extra bytes inside
  * @param dw: a DWORD will be added and it will be shown in Hex digits
  */
-bool WinString::Append(DWORD dw){
+bool _stdcall WinString::Append(DWORD dw){
 	char * lpASCIIBytes			= NULL;
 	wchar_t * wcExtra			= NULL;
 	wchar_t * lpWCharNew		= NULL;
@@ -305,7 +305,7 @@ bool WinString::Append(DWORD dw){
 /**
  * Get the bytes
  */
-char * WinString::GetBytes(){
+char * _stdcall WinString::GetBytes(){
 	return this->lpBytes;
 }
 
@@ -313,15 +313,15 @@ char * WinString::GetBytes(){
 // Type
 //
 // Type: Is WideChar
-bool WinString::TypeIsWideChar(){
+bool _stdcall WinString::TypeIsWideChar(){
 	return this->type == TYPE_WIDE_CHARACTER;
 }
 // Type: Is ASCII
-bool WinString::TypeIsASCII(){
+bool _stdcall WinString::TypeIsASCII(){
 	return this->type == TYPE_ASCII;
 }
 // Type: Is UTF8
-bool WinString::TypeIsUTF8(){
+bool _stdcall WinString::TypeIsUTF8(){
 	return this->type == TYPE_UTF8;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -330,7 +330,7 @@ bool WinString::TypeIsUTF8(){
  * Parse to UTF8
  * @return: NULL, fail; not NULL, succeed
  */
-char * WinString::Parse2UTF8(){
+char * _stdcall WinString::Parse2UTF8(){
 	wchar_t * lpWCTemp = NULL;
 	char * lpBytesTemp = NULL;
 	char * utf8Bytes = NULL;			// Default is NULL
@@ -381,7 +381,7 @@ char * WinString::Parse2UTF8(){
 /**
  * Parse to WideChar
  */
-wchar_t * WinString::Parse2WideChar(){
+wchar_t * _stdcall WinString::Parse2WideChar(){
 	// No transfer if it is
 	if(this->TypeIsWideChar()){
 		return this->lpWChar;

@@ -26,8 +26,6 @@
     #define DBG_NEW new
 #endif
 
-using namespace WinString_0_1_0;
-
 //------------------------------------
 // Assistance Functions
 //------------------------------------

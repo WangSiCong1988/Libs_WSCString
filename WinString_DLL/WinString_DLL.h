@@ -67,47 +67,46 @@ public:
 	/* SetDefaultType
 	 * @param type: the code type in your source files 
 	*/
-	static bool SetDefaultType(const UINT type);
+	static bool _stdcall SetDefaultType(const UINT type);
 
 	/* Create */
-	static WinString * Create();					// Create: An empty ASCII string
-	static WinString * Create(const char * str);	// Create: An Default String
-
+	static WinString * _stdcall Create();					// Create: An empty ASCII string
+	static WinString * _stdcall Create(const char * str);	// Create: An Default String
 	/* Destroy */
-	static void Destroy(WinString * lp);
-	
+	static void _stdcall Destroy(WinString * lp);
+
 	/**
 	 * Add extra bytes inside
 	 * @param bytes: the bytes to be appended
 	 * @param type: the extra bytes' type. If it does not fit the type of old bytes, return false
 	 */
-	bool Append(const char * bytes, UINT type);
+	bool _stdcall Append(const char * bytes, UINT type);
 	/**
 	 * Add extra bytes inside
 	 * @param dw: a DWORD will be added and it will be shown in Hex digits
 	 */
-	bool Append(DWORD dw);
+	bool _stdcall Append(DWORD dw);
 
 	/**
 	 * Get the bytes
 	 */
-	char * GetBytes();
+	char * _stdcall GetBytes();
 	
 	/* Type */
-	bool TypeIsWideChar();	// Type: Is WideChar
-	bool TypeIsASCII();		// Type: Is ASCII
-	bool TypeIsUTF8();		// Type: Is UTF8
+	bool _stdcall TypeIsWideChar();	// Type: Is WideChar
+	bool _stdcall TypeIsASCII();		// Type: Is ASCII
+	bool _stdcall TypeIsUTF8();		// Type: Is UTF8
 
 	/**
 	 * Parse to UTF8
 	 * @return: NULL, fail; not NULL, succeed
 	 */
-	char * Parse2UTF8();
+	char * _stdcall Parse2UTF8();
 
 	/**
 	 * Parse to WideChar
 	 */
-	wchar_t * Parse2WideChar();
+	wchar_t * _stdcall Parse2WideChar();
 };
 
 
