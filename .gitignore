@@ -1,7 +1,8 @@
-#忽略所有文件，注意放在开头
+﻿#忽略所有文件，注意放在开头
 /*
 
 #生产环节追逐文件
 !/prod
 !/LICENSE
 !/README.md
+!/build_prod.bat
