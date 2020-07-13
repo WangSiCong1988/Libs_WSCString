@@ -57,6 +57,8 @@ My personal string header file working in Windows C/C++ (only support English & 
 [Windows编码ID](https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers)
 
 ## 源代码修改注意事项
+* public methods must be _stdcall<br>
+如果通过VC++编写的DLL欲被其他语言编写的程序调用，应将函数的调用方式声明为__stdcall方式
 * 内存泄漏测试方式<br>
 [使用 CRT 库查找内存泄漏](https://docs.microsoft.com/zh-cn/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2019)<br>
 CRT库的建议会导致new (str::nothrow)无法被编译器识别，所以编写时new必须采用try catch方式检测失败（设置异常函数的方法被抛弃：因为异常函数编写时可能再发生异常，导致逻辑复杂）
