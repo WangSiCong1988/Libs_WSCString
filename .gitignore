@@ -1,6 +1,7 @@
 # 忽略生产脚本输出目录
 /prod/*
 prod/*
+prod_TMP/
 
 # VC++6.0 Ignore Rules
 # Track Workspace Configuration 
