@@ -1,72 +1,72 @@
-ï»¿# Libs_WinString
+# Libs_WinString
 My personal string header file working in Windows C/C++ (only support English & Chinese)
 
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg?style=flat-square)](https://github.com/996icu/996.ICU/blob/master/LICENSE) [![HitCount](http://hits.dwyl.com/WangSiCong1988/Libs_Win32String.svg)](http://hits.dwyl.com/WangSiCong1988/Libs_Win32String)
 
-## ç¼–è¯‘
-`WinString_DLL`Releaseç¼–è¯‘åï¼Œæ‰§è¡Œ`build_prod.bat`ç”Ÿæˆç”Ÿäº§ç¯å¢ƒæ–‡ä»¶
+## ±àÒë
+`WinString_DLL`Release±àÒëºó£¬Ö´ĞĞ`build_prod.bat`Éú³ÉÉú²ú»·¾³ÎÄ¼ş
 
-## è°ƒç”¨æ–¹å¼ï¼ˆDLLæ–¹å¼ï¼‰
-* DLL å¯¼å…¥åº“çš„æ–‡ä»¶<br>
-	`WinString_DLL.h`å¯¼å‡ºWinStringç±»<br>
+## µ÷ÓÃ·½Ê½£¨DLL·½Ê½£©
+* DLL µ¼Èë¿âµÄÎÄ¼ş<br>
+	`WinString_DLL.h`µ¼³öWinStringÀà<br>
 	`WinString_DLL.dll`<br>
 	`WinString_DLL.lib`<br>
-* DLL å¯¼å…¥åº“æ·»åŠ åˆ°é¡¹ç›®<br>
-[Microsoftæ¨èæ–¹å¼ï¼šDLL å¯¼å…¥åº“æ·»åŠ åˆ°é¡¹ç›®](https://docs.microsoft.com/zh-cn/cpp/build/walkthrough-creating-and-using-a-dynamic-link-library-cpp?view=vs-2019)
-* é”™è¯¯å¤„ç†
-	* `æ— æ³•è§£æçš„å¤–éƒ¨ç¬¦å· "__declspec(dllimport) public: wchar_t * __thiscall WinString::Parse2WideChar(void)" (__imp_?Parse2WideChar@WinString@@QAEPA_WXZ)`<br>
-	åœ¨Configuration Properties-> C/C++-> Languageä¸­ï¼Œè®¾ç½®Treat wchar_t as Built-in Type = Noï¼ˆå¦‚æœé€‰YesæŠ¥é”™ï¼‰	
-	* æ‰‹åŠ¨é‡Šæ”¾WinStringæŒ‡é’ˆæ˜¾ç¤ºä¸å¯è®¿é—®<br>
-	å› ä¸ºè°ƒç”¨Create()æ–¹æ³•åˆ†é…çš„ç©ºé—´æ˜¯åœ¨DLLçš„å †æ ˆä¸­è€Œä¸æ˜¯ä½ çš„ç¨‹åºä¸­ï¼Œå› æ­¤ä¸èƒ½é‡‡ç”¨deleteé‡Šæ”¾ã€‚æ­£ç¡®çš„åšæ³•æ˜¯ä½¿ç”¨`WinString::Destroy(WinString * lp)`ï¼Œæ¥é‡Šæ”¾åœ¨DLLå †æ ˆä¸­çš„ç©ºé—´ã€‚æ‰€ä»¥`~WinString()`æ–¹æ³•è¢«è®¾ä¸ºç§æœ‰ï¼Œé¿å…é”™è¯¯é‡Šæ”¾ã€‚
+* DLL µ¼Èë¿âÌí¼Óµ½ÏîÄ¿<br>
+[MicrosoftÍÆ¼ö·½Ê½£ºDLL µ¼Èë¿âÌí¼Óµ½ÏîÄ¿](https://docs.microsoft.com/zh-cn/cpp/build/walkthrough-creating-and-using-a-dynamic-link-library-cpp?view=vs-2019)
+* ´íÎó´¦Àí
+	* `ÎŞ·¨½âÎöµÄÍâ²¿·ûºÅ "__declspec(dllimport) public: wchar_t * __thiscall WinString::Parse2WideChar(void)" (__imp_?Parse2WideChar@WinString@@QAEPA_WXZ)`<br>
+	ÔÚConfiguration Properties-> C/C++-> LanguageÖĞ£¬ÉèÖÃTreat wchar_t as Built-in Type = No£¨Èç¹ûÑ¡Yes±¨´í£©	
+	* ÊÖ¶¯ÊÍ·ÅWinStringÖ¸ÕëÏÔÊ¾²»¿É·ÃÎÊ<br>
+	ÒòÎªµ÷ÓÃCreate()·½·¨·ÖÅäµÄ¿Õ¼äÊÇÔÚDLLµÄ¶ÑÕ»ÖĞ¶ø²»ÊÇÄãµÄ³ÌĞòÖĞ£¬Òò´Ë²»ÄÜ²ÉÓÃdeleteÊÍ·Å¡£ÕıÈ·µÄ×ö·¨ÊÇÊ¹ÓÃ`WinString::Destroy(WinString * lp)`£¬À´ÊÍ·ÅÔÚDLL¶ÑÕ»ÖĞµÄ¿Õ¼ä¡£ËùÒÔ`~WinString()`·½·¨±»ÉèÎªË½ÓĞ£¬±ÜÃâ´íÎóÊÍ·Å¡£
 	```c++
 	WinString * lpWS = WinString::Create();
-	WinString::Destroy(lpWS);			// delete lpWS æ˜¾ç¤ºä¸å¯è®¿é—®ï¼Œè¿™ä¸ªè®¾ç½®æ˜¯ä¸ºäº†å¼ºåˆ¶ç¼–å†™è€…åœ¨DLLå †æ ˆä¸­é‡Šæ”¾ç©ºé—´
+	WinString::Destroy(lpWS);			// delete lpWS ÏÔÊ¾²»¿É·ÃÎÊ£¬Õâ¸öÉèÖÃÊÇÎªÁËÇ¿ÖÆ±àĞ´ÕßÔÚDLL¶ÑÕ»ÖĞÊÍ·Å¿Õ¼ä
 	```
-	* `_CrtIsValidHeapPointerå‡ºé”™`<br>
-	å†…å­˜ç”³è¯·å’Œé‡Šæ”¾ä¸åœ¨åŒä¸€å †æ ˆä¸Šï¼Œè¯¦è§[_CrtIsValidHeapPointerå‡ºé”™çš„è§£å†³æ–¹æ³•](https://blog.csdn.net/u014287775/article/details/76098363)
+	* `_CrtIsValidHeapPointer³ö´í`<br>
+	ÄÚ´æÉêÇëºÍÊÍ·Å²»ÔÚÍ¬Ò»¶ÑÕ»ÉÏ£¬Ïê¼û[_CrtIsValidHeapPointer³ö´íµÄ½â¾ö·½·¨](https://blog.csdn.net/u014287775/article/details/76098363)
 
-## æ”¯æŒçš„ç¼–ç 
-* `WIDE_CHARACTER` ä»…åœ¨å†…å­˜ä¸­ä½¿ç”¨ã€‚**<font color="red">æ³¨æ„ï¼šè¿™ä¸ªæ ¼å¼vc/c++ä¸­ç›´æ¥ä½¿ç”¨çš„æ ¼å¼ä¸åŒ</font>**<br>
-	* VC/C++ wchar_tå®ç°æ–¹å¼<br>
-	vc/c++ä¸­çš„è‹±æ–‡å­—ç¬¦ä»ç„¶é‡‡ç”¨ASCIIç¼–ç æ–¹å¼ã€‚å¯ä»¥è®¾æƒ³ï¼Œå…¶ä»–å›½å®¶ç¨‹åºå‘˜åˆ©ç”¨vc/c++ç¼–å†™ç¨‹åºè¾“å…¥æœ¬å›½å­—ç¬¦æ—¶ï¼Œvc/c++åˆ™ä¼šé‡‡ç”¨è¯¥å›½çš„å­—ç¬¦ç¼–ç æ–¹å¼æ¥å¤„ç†è¿™äº›å­—ç¬¦ã€‚<br>
-	ä»¥ä¸¤å­—èŠ‚ä¸ºå•ä½å­˜æ”¾å­—ç¬¦ï¼Œå³å¦‚æœä¸€ä¸ªå­—ç¬¦ç ä¸ºä¸¤å­—èŠ‚ï¼Œåˆ™åœ¨å†…å­˜ä¸­å å››å­—èŠ‚ï¼Œå­—ç¬¦ç ä¸ºä¸€å­—èŠ‚ï¼Œå°±å ä¸¤å­—èŠ‚ã€‚ä¾‹å¦‚ï¼Œå­—ç¬¦ä¸²â€œä¸­å›½abcâ€å°±å­˜ä¸ºå¦‚ä¸‹æ–¹å¼:<br>
+## Ö§³ÖµÄ±àÂë
+* `WIDE_CHARACTER` ½öÔÚÄÚ´æÖĞÊ¹ÓÃ¡£**<font color="red">×¢Òâ£ºÕâ¸ö¸ñÊ½vc/c++ÖĞÖ±½ÓÊ¹ÓÃµÄ¸ñÊ½²»Í¬</font>**<br>
+	* VC/C++ wchar_tÊµÏÖ·½Ê½<br>
+	vc/c++ÖĞµÄÓ¢ÎÄ×Ö·ûÈÔÈ»²ÉÓÃASCII±àÂë·½Ê½¡£¿ÉÒÔÉèÏë£¬ÆäËû¹ú¼Ò³ÌĞòÔ±ÀûÓÃvc/c++±àĞ´³ÌĞòÊäÈë±¾¹ú×Ö·ûÊ±£¬vc/c++Ôò»á²ÉÓÃ¸Ã¹úµÄ×Ö·û±àÂë·½Ê½À´´¦ÀíÕâĞ©×Ö·û¡£<br>
+	ÒÔÁ½×Ö½ÚÎªµ¥Î»´æ·Å×Ö·û£¬¼´Èç¹ûÒ»¸ö×Ö·ûÂëÎªÁ½×Ö½Ú£¬ÔòÔÚÄÚ´æÖĞÕ¼ËÄ×Ö½Ú£¬×Ö·ûÂëÎªÒ»×Ö½Ú£¬¾ÍÕ¼Á½×Ö½Ú¡£ÀıÈç£¬×Ö·û´®¡°ÖĞ¹úabc¡±¾Í´æÎªÈçÏÂ·½Ê½:<br>
 	```c++
-	wchar_t str = "ä¸­å›½abc";
+	wchar_t str = "ÖĞ¹úabc";
 	```
-	![wchar_t ç©ºé—´åˆ†é…è§„åˆ™][/img/wchar_tç©ºé—´åˆ†é…è§„åˆ™.bmp]<br>
+	![wchar_t ¿Õ¼ä·ÖÅä¹æÔò][/img/wchar_t¿Õ¼ä·ÖÅä¹æÔò.bmp]<br>
 
-	* WinString å®ç°æ–¹å¼<br>
-	WinStringä¸­çš„wchar_tç±»å‹é‡‡ç”¨UTF-16ï¼ˆä¸€ä¸ªä¸­æ–‡å­—ç¬¦åªå ç”¨2ä¸ªå­—èŠ‚ï¼‰ï¼Œè€Œä¸æ˜¯ç®€å•çš„æ‰©å……ç©ºé—´ç‰ˆæœ¬ASCIIç¼–ç ã€‚æ‰€ä»¥`printf("%ls")`æ‰“å°æ—¶å‡ºç°ä¸­æ–‡ç¼–ç æ•…éšœï¼Œå› æ­¤è¦åˆ¶å®šå‘½ä»¤è¡Œç¼–ç æ–¹å¼
+	* WinString ÊµÏÖ·½Ê½<br>
+	WinStringÖĞµÄwchar_tÀàĞÍ²ÉÓÃUTF-16£¨Ò»¸öÖĞÎÄ×Ö·ûÖ»Õ¼ÓÃ2¸ö×Ö½Ú£©£¬¶ø²»ÊÇ¼òµ¥µÄÀ©³ä¿Õ¼ä°æ±¾ASCII±àÂë¡£ËùÒÔ`printf("%ls")`´òÓ¡Ê±³öÏÖÖĞÎÄ±àÂë¹ÊÕÏ£¬Òò´ËÒªÖÆ¶¨ÃüÁîĞĞ±àÂë·½Ê½
 	```
-	setlocale(LC_CTYPE, "chinese-simplified");		// ç®€ä½“
+	setlocale(LC_CTYPE, "chinese-simplified");		// ¼òÌå
 	setlocale(LC_CTYPE, "chs");
-	setlocale(LC_CTYPE, "chinese-traditional");		// ç¹ä½“ï¼Œå¦‚æœä¸æˆåŠŸï¼Œåˆ™é‡‡ç”¨æŒ‡æ˜åŒºåŸŸçš„ç¹ä½“
-	setlocale(LC_ALL, "chinese-hongkong");			// ç¹ä½“ï¼Œé¦™æ¸¯
-	setlocale(LC_CTYPE, "chinese_taiwan.950");		// ç¹ä½“ï¼Œå°æ¹¾
+	setlocale(LC_CTYPE, "chinese-traditional");		// ·±Ìå£¬Èç¹û²»³É¹¦£¬Ôò²ÉÓÃÖ¸Ã÷ÇøÓòµÄ·±Ìå
+	setlocale(LC_ALL, "chinese-hongkong");			// ·±Ìå£¬Ïã¸Û
+	setlocale(LC_CTYPE, "chinese_taiwan.950");		// ·±Ìå£¬Ì¨Íå
 	```
-* `ASCII` åœ¨ä¸­æ–‡ç‰ˆWindowsç³»ç»Ÿä¸­ï¼ŒASCIIä¹Ÿå¯ä»¥æ”¯æŒä¸­æ–‡ã€‚è‹±æ–‡ã€è‹±æ–‡æ ‡ç‚¹ç¬¦å·ä»é‡‡ç”¨ASCIIç¼–ç ï¼Œä½†æ˜¯ä¸­æ–‡é‡‡ç”¨åˆ«çš„ç¼–ç å®ç°ã€‚å¤§é™†ç‰ˆWindowsé‡‡ç”¨GB2312ï¼Œå°æ¹¾ç‰ˆWindowsé‡‡ç”¨Big5
+* `ASCII` ÔÚÖĞÎÄ°æWindowsÏµÍ³ÖĞ£¬ASCIIÒ²¿ÉÒÔÖ§³ÖÖĞÎÄ¡£Ó¢ÎÄ¡¢Ó¢ÎÄ±êµã·ûºÅÈÔ²ÉÓÃASCII±àÂë£¬µ«ÊÇÖĞÎÄ²ÉÓÃ±ğµÄ±àÂëÊµÏÖ¡£´óÂ½°æWindows²ÉÓÃGB2312£¬Ì¨Íå°æWindows²ÉÓÃBig5
 * `UTF8`
 * `UTF16_LittleEndian`
 * `UTF16_BigEndian`
 * `ISO_8859_1`
 * `GB18030`<br>
-![GB18030å­—ç¬¦é›†ç¼–ç è§„åˆ™][/img/GB18030å­—ç¬¦é›†ç¼–ç è§„åˆ™.webp]<br>
+![GB18030×Ö·û¼¯±àÂë¹æÔò][/img/GB18030×Ö·û¼¯±àÂë¹æÔò.webp]<br>
 * `GB2312`
 
 ### Windows Code Page Identifiers
-[Windowsç¼–ç ID](https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers)
+[Windows±àÂëID](https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers)
 
-## æºä»£ç ä¿®æ”¹æ³¨æ„äº‹é¡¹
+## Ô´´úÂëĞŞ¸Ä×¢ÒâÊÂÏî
 * public methods must be _stdcall<br>
 
-å¦‚æœé€šè¿‡VC++ç¼–å†™çš„DLLæ¬²è¢«å…¶ä»–è¯­è¨€ç¼–å†™çš„ç¨‹åºè°ƒç”¨ï¼Œåº”å°†å‡½æ•°çš„è°ƒç”¨æ–¹å¼å£°æ˜ä¸º__stdcallæ–¹å¼
-* å†…å­˜æ³„æ¼æµ‹è¯•æ–¹å¼<br>
-[ä½¿ç”¨ CRT åº“æŸ¥æ‰¾å†…å­˜æ³„æ¼](https://docs.microsoft.com/zh-cn/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2019)<br>
-CRTåº“çš„å»ºè®®ä¼šå¯¼è‡´new (str::nothrow)æ— æ³•è¢«ç¼–è¯‘å™¨è¯†åˆ«ï¼Œæ‰€ä»¥ç¼–å†™æ—¶newå¿…é¡»é‡‡ç”¨try catchæ–¹å¼æ£€æµ‹å¤±è´¥ï¼ˆè®¾ç½®å¼‚å¸¸å‡½æ•°çš„æ–¹æ³•è¢«æŠ›å¼ƒï¼šå› ä¸ºå¼‚å¸¸å‡½æ•°ç¼–å†™æ—¶å¯èƒ½å†å‘ç”Ÿå¼‚å¸¸ï¼Œå¯¼è‡´é€»è¾‘å¤æ‚ï¼‰
-* try catch å¼‚å¸¸æ•æ‰é‡‡ç”¨å¼•ç”¨æ•æ‰<br>
-å½“catchæ•æ‰åˆ°å¼‚å¸¸æ—¶ï¼Œå¦‚æœé‡‡ç”¨æŒ‰å€¼ä¼ é€’ï¼Œä¼šæŠŠå¼‚å¸¸å¯¹è±¡æ‹·è´ä¸€æ¬¡ï¼Œæ‰ä¸“é€’è¿‡æ¥ï¼ˆæŒ‰å¼•ç”¨å°±æ²¡æœ‰è¿™ä¸ªæ‹·è´è¿‡ç¨‹ï¼‰ã€‚å¼‚å¸¸å¤„ç†å¯èƒ½å·¥ä½œåœ¨å†…å­˜æåº¦ç´§å¼ çš„æƒ…å†µï¼Œå› æ­¤é‡‡ç”¨æŒ‰å¼•ç”¨ä¼ é€’ï¼Œå‡å°‘å†…å­˜æ¶ˆè€—
-* `WinString()`å’Œ`~WinString()`å¿…é¡»è®¾ä¸ºç§æœ‰ï¼Œè®©å†…å­˜é‡Šæ”¾å¼ºåˆ¶è°ƒç”¨DLLæä¾›çš„æ–¹æ³•ï¼Œé¿å…å†…å­˜è·¨æ¨¡å—é‡Šæ”¾<br>
-è¯¦è§[_CrtIsValidHeapPointerå‡ºé”™çš„è§£å†³æ–¹æ³•](https://blog.csdn.net/u014287775/article/details/76098363)
+Èç¹ûÍ¨¹ıVC++±àĞ´µÄDLLÓû±»ÆäËûÓïÑÔ±àĞ´µÄ³ÌĞòµ÷ÓÃ£¬Ó¦½«º¯ÊıµÄµ÷ÓÃ·½Ê½ÉùÃ÷Îª__stdcall·½Ê½
+* ÄÚ´æĞ¹Â©²âÊÔ·½Ê½<br>
+[Ê¹ÓÃ CRT ¿â²éÕÒÄÚ´æĞ¹Â©](https://docs.microsoft.com/zh-cn/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2019)<br>
+CRT¿âµÄ½¨Òé»áµ¼ÖÂnew (str::nothrow)ÎŞ·¨±»±àÒëÆ÷Ê¶±ğ£¬ËùÒÔ±àĞ´Ê±new±ØĞë²ÉÓÃtry catch·½Ê½¼ì²âÊ§°Ü£¨ÉèÖÃÒì³£º¯ÊıµÄ·½·¨±»Å×Æú£ºÒòÎªÒì³£º¯Êı±àĞ´Ê±¿ÉÄÜÔÙ·¢ÉúÒì³££¬µ¼ÖÂÂß¼­¸´ÔÓ£©
+* try catch Òì³£²¶×½²ÉÓÃÒıÓÃ²¶×½<br>
+µ±catch²¶×½µ½Òì³£Ê±£¬Èç¹û²ÉÓÃ°´Öµ´«µİ£¬»á°ÑÒì³£¶ÔÏó¿½±´Ò»´Î£¬²Å×¨µİ¹ıÀ´£¨°´ÒıÓÃ¾ÍÃ»ÓĞÕâ¸ö¿½±´¹ı³Ì£©¡£Òì³£´¦Àí¿ÉÄÜ¹¤×÷ÔÚÄÚ´æ¼«¶È½ôÕÅµÄÇé¿ö£¬Òò´Ë²ÉÓÃ°´ÒıÓÃ´«µİ£¬¼õÉÙÄÚ´æÏûºÄ
+* `WinString()`ºÍ`~WinString()`±ØĞëÉèÎªË½ÓĞ£¬ÈÃÄÚ´æÊÍ·ÅÇ¿ÖÆµ÷ÓÃDLLÌá¹©µÄ·½·¨£¬±ÜÃâÄÚ´æ¿çÄ£¿éÊÍ·Å<br>
+Ïê¼û[_CrtIsValidHeapPointer³ö´íµÄ½â¾ö·½·¨](https://blog.csdn.net/u014287775/article/details/76098363)
 
 License
 ---
