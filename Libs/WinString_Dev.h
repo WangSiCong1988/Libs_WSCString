@@ -35,8 +35,8 @@
 		bool res = false;
 		char * lpTMP_Bytes = NULL;
 		wchar_t * lpTMP_Wchar = NULL;
-		int bytesNumTMP = 0;
-		int wcharNumTMP = 0;
+		size_t bytesNumTMP = 0;
+		size_t wcharNumTMP = 0;
 
 		// ¥¶¿Ì
 		try {
@@ -79,8 +79,7 @@
 	*/
 	bool WinString::_Init(const char * str) {
 		bool res = false;
-		size_t bytesNum = 0;
-		int bytesNumTMP = 0;
+		size_t bytesNumTMP = 0;
 		char * lpBytesTMP = NULL;
 
 		// Process
