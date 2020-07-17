@@ -7,6 +7,13 @@ My personal string header file working in Windows C/C++ (only support English & 
 `WinString_DLL`Release编译后，执行`build_prod.bat`生成生产环境文件
 
 ## 调用方式（DLL方式）
+* 开启开发模式
+
+```c++
+
+#define _LWS_WINSTRING_DEV
+
+```
 * DLL 导入库的文件<br>
 	`WinString_DLL.h`导出WinString类<br>
 	`WinString_DLL.dll`<br>
